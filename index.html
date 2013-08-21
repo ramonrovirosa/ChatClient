@@ -1,1 +1,199 @@
-Ramon Rovirosa
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XMPP Client Strophe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/client.css">
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/js/bootstrap.min.js"></script>
+    <script src='js/strophe.js'></script>
+    <script type="text/javascript" src="js/strophe.pubsub.min.js"></script>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js'></script>
+    <script src='js/xmpp_client.js'></script>
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Strophe XMPP Chat Client</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Login</a></li>
+                <li><a href="#about">Contacts</a></li>
+                <li><a href="#contact">Message</a></li>
+                <li><a href="#contact">PubSub-Publish</a></li>
+                <li><a href="#contact">PubSub-Subscribe</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container">
+    <div class="login-box panel">
+        <div class="panel-heading pHead">Login</div>
+            <div class="panel-body">
+                <div class="input-group">
+                    <span class="input-group-addon">UserName:</span>
+                    <input type="text" class="form-control" placeholder="JID" id='jid' data-bind="value:jid">
+                    <span class="input-group-addon">Password:</span>
+                    <input type='password' class="form-control" placeholder="" id='pass' data-bind="value:password">
+                    <span class="input-group-addon">Priority:</span>
+                    <input type="text" class="form-control" placeholder="-10,0,10" default="0" id="priority" >
+                </div>
+
+                <input type="button" class="btn btn-default " data-bind="click: connect" id='connect' value="Connect" />
+                <div data-bind="style: {color: connectText() == 'Connected!' ? 'green' : 'black'}">
+                    <div class="" data-bind="visible: connecting" id="connecting">
+                        <div data-bind="text:connectText"></div>
+                    </div>
+                </div>
+
+            </div>
+    </div>
+
+    <div class="login-box panel">
+        <div class="panel-heading pHead">Contacts</div>
+        <div class="panel-body" data-bind="visible: connecting">
+            <table class="table table-bordered table-condensed">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>JID</th>
+                    <th>Online/Offline</th>
+                </tr>
+                </thead>
+                <tbody data-bind='foreach: contacts'>
+                    <tr data-bind="style:{color: status() == 'Offline' ? 'black' : 'green'}">
+                        <td data-bind="text: name"></td>
+                        <td data-bind="text:jid"></td>
+                        <td data-bind="text:status"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <div class="login-box panel ">
+        <div class="panel-heading pHead" >Message</div>
+        <div class="panel-body" data-bind="visible: connecting">
+            <h3 class="pHead">Send a Message</h3>
+            <div class="input-group">
+                <span class="input-group-addon">Message</span>
+                <input type="text" class="form-control" placeholder="Username" data-bind="value:sendUsername" >
+                <textarea type="text" class="form-control" placeholder="Message here..." rows="4" data-bind="value:sendMessageText"></textarea>
+            </div>
+            <button type="button" class="btn btn-default" id="sendButton" data-bind="click:sendMessage">Send</button>
+            <div data-bind="visible:firstMessageSent">
+                <h3 class="pHead">Messages Sent</h3>
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>To</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind='foreach: sentMessages'>
+                    <tr>
+                        <td data-bind="text: to"></td>
+                        <td data-bind="text:message"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div data-bind="visible:firstMessageReceived">
+                <h3 class="pHead">Messages Received</h3>
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind='foreach: receivedMessages'>
+                    <tr>
+                        <td data-bind="text: from"></td>
+                        <td data-bind="text: body"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-box panel">
+        <div class="panel-heading pHead">Publish Subscribe</div>
+        <div class="panel-body" data-bind="visible: connecting">
+            <h3 class="pHead">Publish A Message to All Subscribers</h3>
+            <div class="input-group">
+                <span class="input-group-addon">Node Name</span>
+                <input type="text" class="form-control" placeholder="Node" data-bind="value: publishNode">
+                <!--<span class="input-group-addon">Message</span>-->
+                <!--<textarea type="text" class="form-control" placeholder="Message here..." rows="4" data-bind="value: publishText"></textarea>-->
+            </div>
+            <div class="input-group" data-bind="visible:nodeCreated" id="nodeMessage">
+                <span class="input-group-addon">Message</span>
+                <textarea type="text" class="form-control" placeholder="Message here..." rows="4" data-bind="value: publishText"></textarea>
+            </div>
+
+            <!--<button type="button" class="btn btn-default" id="logInButton" data-bind="click:publishMessage">Publish</button>-->
+            <input type="button" class="btn btn-default " data-bind="click:publishMessage,value:pubButton" id="logInButton"  />
+            <div >
+                <h3 class="pHead">PubSub Messages Sent</h3>
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Publisher</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind='foreach: publishedMessage'>
+                    <tr>
+                        <td data-bind="text: from"></td>
+                        <td data-bind="text: body"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="input-group sub" id="subscribe">
+                <span class="input-group-addon">Subscribe</span>
+                <input type="text" class="form-control" placeholder="Node" data-bind="value:subscribeNode">
+            </div>
+            <button type="button" class="btn btn-default" id="subscribeButton" data-bind="click:pubSubscribe">Subscribe</button>
+            <div data-bind="visible: clientSubscribed">
+                <h3 class="pHead">PubSub Messages Received</h3>
+                <table class="table table-bordered table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Subscription</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind='foreach: subscribedMessages'>
+                    <tr>
+                        <td data-bind="text: from"></td>
+                        <td data-bind="text: body"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div><!-- /.container -->
+
+</body>
+</html>

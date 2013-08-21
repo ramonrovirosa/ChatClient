@@ -1,0 +1,32 @@
+body {
+    padding-top: 50px;
+
+}
+.login-box {
+    margin: 40px 15px;
+
+}
+.pHead{
+    text-align: center;
+    font-size:24px;
+}
+#connect{
+    margin-top: 10px;
+
+}
+.sub{
+    margin-top: 10px;
+}
+
+#connecting{
+    margin-top: 10px;
+    font-size: 24px;
+}
+#sendButton,#logInButton,#subscribeButton,#nodeMessage{
+    margin-top: 10px;
+}
+
+#subscribe{
+    margin-top:50px;
+}
+
