@@ -1,4 +1,4 @@
-var BOSH_SERVICE = 'http://localhost:5280/http-bind';
+var BOSH_SERVICE = 'http://bosh.metajack.im:5280/xmpp-httpbind';
 var connection = null;
 var viewModel = new contactsModel(); //viewModel
 
